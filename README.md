@@ -1,6 +1,6 @@
 Application can deploy/undeploy java war file to tomcat webapp dir  
   
-required linux debian or redhat family, jdk 1.8 and groovy 2.4, , deploy work only on local dir  
+required linux debian or redhat family, tomcat 7-8, jdk 1.8 and groovy 2.4, , deploy work only on local dir  
   
 deploy.gvy --help  
 usage: deploy.gvy --host <host> --action <deploy/undeploy> --app <war filepath> --config <script config path>  

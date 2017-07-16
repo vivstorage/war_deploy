@@ -13,4 +13,4 @@ usage: deploy.gvy --host <host> --action <deploy/undeploy> --app <war filepath> 
  -u,--username <username>   tomcat username  
   
    
-tested with "https://github.com/myCustomDemo/servlet/"
+tested on https://github.com/myCustomDemo/servlet

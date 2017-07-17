@@ -3,18 +3,18 @@
 import java.text.*
 
 void Restart_tomcat() {
-    def b = new StringBuffer()
+    def Ee = new StringBuffer()
     println "Stopping tomcat..."
     stop = 'service tomcat stop'.execute()
-    stop.consumeProcessErrorStream(b)
+    stop.consumeProcessErrorStream(Ee)
     stop.waitForOrKill(10)
-    println b.toString()
+    println Ee.toString()
 
     println "Starting tomcat..."
     start = 'service tomcat start'.execute()
-    start.consumeProcessErrorStream(b)
+    start.consumeProcessErrorStream(Ee)
     start.waitForOrKill(10)
-    println b.toString()
+    println Ee.toString()
 }
 
 void Application_check() {
@@ -26,7 +26,7 @@ void Application_check() {
       get_html_body = 'curl -sSf http://localhost:8080/test-1/hello'.execute()
       println get_html_body.text
     } else {
-      println "ERROR problem with application, check data"
+      exitWithMessage("ERROR problem with application, check data")
     }
 }
 

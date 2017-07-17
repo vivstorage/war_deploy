@@ -89,14 +89,24 @@ def update_config(args) {
     //update options
     if (options.hn){
         config.host = options.hn    }
+    else if (!config.host){
+        exitWithMessage("No host specified") }
     if (options.a){
         config.app = options.a }
+    else if (!config.a){
+        exitWithMessage("No application file specified") }
     if (options.u){
         config.user = options.u    }
+    else if (!config.u){
+        exitWithMessage("No tomcat user specified") }
     if (options.p){
         config.password = options.p   }
+    else if (!config.p){
+        exitWithMessage("No tomcat password specified") }
     if (options.ac){
         config.action = options.ac  }
+    else if (!config.ac){
+        exitWithMessage("No action specified") }
 
     //check if war file exist and extension is .war
     warFile = new File(config.app)

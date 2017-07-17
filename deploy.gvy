@@ -101,7 +101,7 @@ def update_config(args) {
         config.password = options.p   }
     if (options.ac){
         config.action = options.ac  }
-    else if (!config.ac){
+    else if (!config.action){
         exitWithMessage("No action specified") }
 
     //check if war file exist and extension is .war

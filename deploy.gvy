@@ -106,7 +106,7 @@ def update_config(args) {
 
     //check if war file exist and extension is .war
     warFile = new File(config.app)
-    warFile.name.endsWith('.war') || exitWithMessage('Unknown type ' + config.app)
+    warFile.name.endsWith('war') || exitWithMessage('Unknown file type ' + warFile.name + ', .war only accepted')
     warFile.exists() || exitWithMessage("File not found ${warFile} ")
 
     if (config.action.toLowerCase() == 'deploy') {

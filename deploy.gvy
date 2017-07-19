@@ -82,7 +82,7 @@ void Deploy (String file, String host) {
     Files.copy(Paths.get(file), Paths.get(war_file))
     Restart_tomcat()
     Application_check()
-    println "Deploying done!"
+    println "Application deploy finished successfully!"
 }
 
 void unDeploy(String file, String host) {
@@ -100,7 +100,7 @@ void unDeploy(String file, String host) {
     if (!fileSuccessfullyDeleted)
         exitWithMessage("ERROR: Can't remove war file, check if file exist")     
     Restart_tomcat()
-    println "Undeploying done"
+    println "Application removed successfully!"
 }
 
 

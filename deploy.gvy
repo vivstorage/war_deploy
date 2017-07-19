@@ -1,30 +1,67 @@
 #!/usr/bin/env groovy
 
 import java.text.*
+import java.nio.file.Files
+import java.nio.file.Paths
+
 
 void Restart_tomcat() {
     def Ee = new StringBuffer()
-    println "Stopping tomcat..."
-    stop = 'service tomcat stop'.execute()
-    stop.consumeProcessErrorStream(Ee)
-    stop.waitForOrKill(10)
-    println Ee.toString()
+    def sout = new StringBuilder(), serr = new StringBuilder()
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {        
+        println "Stopping tomcat..."
+        stop = 'net stop tomcat8'.execute()
+        stop.consumeProcessErrorStream(Ee)
+        stop.waitForOrKill(10)
+        println Ee.toString() 
+        
+        println "Starting tomcat..."
+        start = 'net start tomcat8'.execute()
+        start.consumeProcessErrorStream(Ee)
+        start.waitForOrKill(10)
+        println Ee.toString() 
+        }
+    if (System.properties['os.name'].toLowerCase().contains('linux')) {
+        println "Stopping tomcat..."
+        stop = 'service tomcat8 stop'.execute()
+        stop.consumeProcessErrorStream(Ee)
+        stop.waitForOrKill(10)
+        println Ee.toString()        
+        
+        println "Starting tomcat..."
+        start = 'service tomcat8 start'.execute()
+        start.consumeProcessErrorStream(Ee)
+        start.waitForOrKill(10)
+        println Ee.toString()        
+        }
+        
+    if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
+        println "Stopping tomcat..."
+        stop = 'sudo catalina stop'.execute()
+        stop.consumeProcessErrorStream(Ee)
+        stop.waitForOrKill(10)
+        println Ee.toString()
+        
+        println "Starting tomcat..."
+        start = 'sudo catalina start'.execute()
+        start.consumeProcessErrorStream(Ee)
+        start.waitForOrKill(10)
+        println Ee.toString()
+    }
 
-    println "Starting tomcat..."
-    start = 'service tomcat start'.execute()
-    start.consumeProcessErrorStream(Ee)
-    start.waitForOrKill(10)
-    println Ee.toString()
 }
 
 void Application_check() {
     println "Checking application..."
-    http_status = '/usr/bin/curl -s -w "%{http_code}" -o /dev/null http://localhost:8080/test-1/hello'.execute()
-    http_result = http_status.text
-    if (http_result.toLowerCase() == '200'){
-      println "http code: OK " +http_result
-      get_html_body = 'curl -sSf http://localhost:8080/test-1/hello'.execute()
-      println get_html_body.text
+    def url = new URL("http://localhost:8080/test-1/hello")
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+    connection.setRequestMethod("GET")
+    sleep(3000)
+    connection.connect()
+    if (connection.responseCode == 200) {
+        String response = connection.inputStream.withReader { Reader reader -> reader.text }
+        println "Application check ok, http code " + connection.responseCode
+        println response
     } else {
       exitWithMessage("ERROR problem with application, check data")
     }
@@ -33,25 +70,39 @@ void Application_check() {
 void Deploy (String file, String host) {
     println "Deploying application..."
     //looking for tomcat webapp dir
-    find_proc = 'find / -type d -name webapps'.execute() | 'grep -w tomcat'.execute()
-    find_proc.in.eachLine { line -> tomcat_webapp_dir=line }
-    copy_file = ['cp' ,file, tomcat_webapp_dir].execute()
-    print copy_file.err.text
+    if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
+        tomcat_version = 'ls /usr/local/Cellar/tomcat/'.execute()
+        tomcat = tomcat_version.text.trim();
+        catalina_base = '/usr/local/Cellar/tomcat/' + tomcat + '/libexec' }
+    else { catalina_base = System.getenv('CATALINA_BASE')}
+    if (!catalina_base)
+        exitWithMessage("CATALINA_BASE variable not set")
+    war_file = catalina_base+'/webapps/' + new File(file).name
+    !new File (war_file).exists() || exitWithMessage("Found app file in tomcat webapp dir, run undeploy before deploy")
+    Files.copy(Paths.get(file), Paths.get(war_file))
     Restart_tomcat()
     Application_check()
+    println "Deploying done!"
 }
-
 
 void unDeploy(String file, String host) {
     println "Undeploying application..."
     //looking for tomcat webapp dir
-    find_proc = 'find / -type d -name webapps'.execute() | 'grep -w tomcat'.execute()
-    find_proc.in.eachLine { line -> tomcat_webapp_dir=line }
-    filename = tomcat_webapp_dir +"/" + file
-    boolean fileSuccessfullyDeleted =  new File(filename).delete()
+    if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
+        tomcat_version = 'ls /usr/local/Cellar/tomcat/'.execute()
+        tomcat = tomcat_version.text.trim();
+        catalina_base = '/usr/local/Cellar/tomcat/' + tomcat + '/libexec' }
+    else { catalina_base = System.getenv('CATALINA_BASE')}
+    if (!catalina_base)
+        exitWithMessage("CATALINA_BASE variable not set")
+    war_file = catalina_base+'/webapps/' + file
+    boolean fileSuccessfullyDeleted =  new File(war_file).delete()
+    if (!fileSuccessfullyDeleted)
+        exitWithMessage("ERROR: Can't remove war file, check if file exist")     
     Restart_tomcat()
     println "Undeploying done"
 }
+
 
 def update_config(args) {
    def cli = new CliBuilder(usage: 'deploy.gvy --host <host> --action <deploy/undeploy> --app <war file path> --config <script config path>')

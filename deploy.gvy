@@ -1,26 +1,34 @@
 #!/usr/bin/env groovy
 
+@Grab( 'net.java.dev.jna:jna:3.5.2' )
+@Grab(group='net.java.dev.jna', module='platform', version='3.5.2')
 import java.text.*
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.sun.jna.*
+import com.sun.jna.win32.*
+import com.sun.jna.platform.win32.*
 
 
 void Restart_tomcat() {
     def Ee = new StringBuffer()
-    def sout = new StringBuilder(), serr = new StringBuilder()
     if (System.properties['os.name'].toLowerCase().contains('windows')) {        
-        println "Stopping tomcat..."
-        stop = 'net stop tomcat8'.execute()
-        stop.consumeProcessErrorStream(Ee)
-        stop.waitForOrKill(10)
-        println Ee.toString() 
-        
-        println "Starting tomcat..."
-        start = 'net start tomcat8'.execute()
-        start.consumeProcessErrorStream(Ee)
-        start.waitForOrKill(10)
-        println Ee.toString() 
+        println "Stopping tomcat..."        
+      try
+        {
+            W32ServiceManager serviceManager = new W32ServiceManager();
+            serviceManager.open(Winsvc.SC_MANAGER_ALL_ACCESS);
+            println serviceManager 
+            W32Service service = serviceManager.openService("tomcat8", Winsvc.SC_MANAGER_ALL_ACCESS);
+            service.stopService();
+            println "Starting tomcat..."
+            service.startService();
+            service.close();
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
         }
+       }
     if (System.properties['os.name'].toLowerCase().contains('linux')) {
         println "Stopping tomcat..."
         stop = 'service tomcat8 stop'.execute()

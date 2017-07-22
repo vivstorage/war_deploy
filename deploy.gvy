@@ -12,14 +12,13 @@ import com.sun.jna.platform.win32.*
 
 void Restart_tomcat() {
     def Ee = new StringBuffer()
-    if (System.properties['os.name'].toLowerCase().contains('windows')) {        
-        println "Stopping tomcat..."        
+    if (System.properties['os.name'].toLowerCase().contains('windows')) { 
       try
         {
             W32ServiceManager serviceManager = new W32ServiceManager();
             serviceManager.open(Winsvc.SC_MANAGER_ALL_ACCESS);
-            println serviceManager 
             W32Service service = serviceManager.openService("tomcat8", Winsvc.SC_MANAGER_ALL_ACCESS);
+            println "Stopping tomcat..." 
             service.stopService();
             println "Starting tomcat..."
             service.startService();

@@ -78,8 +78,8 @@ void Deploy (String file, String host) {
     println "Deploying application..."
     //looking for tomcat webapp dir
     if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
-        tomcat_version = 'ls /usr/local/Cellar/tomcat/'.execute()
-        tomcat = tomcat_version.text.trim();
+        new File("/usr/local/Cellar/tomcat/").eachFile() { file ->
+        tomcat = file.getName() }
         catalina_base = '/usr/local/Cellar/tomcat/' + tomcat + '/libexec' }
     else { catalina_base = System.getenv('CATALINA_BASE')}
     if (!catalina_base)
@@ -96,8 +96,8 @@ void unDeploy(String file, String host) {
     println "Undeploying application..."
     //looking for tomcat webapp dir
     if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
-        tomcat_version = 'ls /usr/local/Cellar/tomcat/'.execute()
-        tomcat = tomcat_version.text.trim();
+        new File("/usr/local/Cellar/tomcat/").eachFile() { file ->
+        tomcat = file.getName() }
         catalina_base = '/usr/local/Cellar/tomcat/' + tomcat + '/libexec' }
     else { catalina_base = System.getenv('CATALINA_BASE')}
     if (!catalina_base)
